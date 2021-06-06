@@ -1,0 +1,194 @@
+Learning Neo4j 3.x second edition 1독 후 주요 내용 요약
+
+chap 1 그래프 이론과 데이터베이스
+
+	p47
+		types of database
+
+			navigational database
+
+			relational database
+
+			nosql database
+
+				key-value store: redis, dynamodb
+
+				column family store: bigtable, cassandra, hbase
+
+				document store: mongodb, couchdb
+
+				graph database: neo4j
+
+	p65
+		neo4j basics
+
+			node		1:1..N	label
+
+			relation	1:1		type
+
+chap 2 Neo4j 시작하기
+
+	p81
+		cypher language
+			https://en.wikipedia.org/wiki/Cypher_(query_language)
+
+	p82
+		opencypher
+			https://www.opencypher.org/
+
+	p87
+		license
+			community edition - GPLv3
+			enterprise edition - AGPLv3 or NTCL
+
+	p89
+		installation options
+
+			windows (jre bundled)
+				server
+					download zip
+					console mode
+						bin\neo4j console
+						http://localhost:7474/browser
+						ctrl-c for stop
+					service mode
+						bin\neo4j install-service
+						neo4j start
+						neo4j stop
+				desktop (recommended)
+					neo4j-desktop-version-setup.exe
+
+			mac or linux (no jre bundle)
+				bin/neo4j start
+				http://localhost:7474
+
+			graph as a service
+				graphenedb
+					this provides a free tier
+				heroku
+				graphstory
+				graphgrid
+				azure
+				clevercloud
+				ovh
+				google cloud platform
+				openshift
+				aws
+
+			neo4j sandbox
+				7 day free tier
+
+			docker
+				ubuntu mint linux
+					install docker-ce
+
+						required packages
+							sudo apt-get -y install apt-transport-https ca-certificates curl
+
+						add docker.com key to local keys
+							sudo -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+
+						add docker repo to the system
+							sudo add-apt-repository "deb [arch=amd64 https://download.docker.com/linux/ubuntu$(lsb_release -cs) stable"
+
+					file system prep
+
+						cd ~
+						mkdir neo4j
+						cd neo4j
+						mkdir logs data
+
+					run neo4j in docker container
+
+						docker run --rm --publish=7474:7474 --publis=7687:7687 --volume=$HOME/neo4j/data:/data --volume=$HOME/neo4j/logs:/logs neo4j:3.1.2
+						docker ps
+						docker stop <container_id>
+
+		versions
+			Release	Release Date	End of Support Date	Compatible Driver Versions
+			4.2		Nov 17, 2020	May 16, 2022		4.2, 4.1, 4.0
+			4.1		Jun 23, 2020	Dec 23, 2021		4.2, 4.1, 4.0
+			4.0		Jan 15, 2020	Jul 14, 2021		4.2, 4.1, 4.0
+			3.5(**)	Nov 29, 2018	Nov 28, 2021		4.2, 4.1, 4.0, 1.7
+			3.4		May 17, 2018	Mar 31, 2020 (*)	1.7, 1.6
+			3.3		Oct 24, 2017	Apr 28, 2019		1.7, 1.6, 1.5, 1.4
+			3.2		May 11, 2017	Nov 31, 2018		1.6, 1.5, 1.4, 1.3
+			3.1		Dec 13, 2016	Jun 13, 2018		1.6, 1.5, 1.4, 1.3, 1.2, 1.1
+			3.0		Apr 16, 2016	Oct 31, 2017		1.5, 1.4, 1.3, 1.2, 1.1, 1.0
+			2.3		Oct 21, 2015	Apr 21, 2017
+			2.2		Mar 25, 2015	Sep 25, 2016
+			2.1		May 29, 2014	Nov 29, 2015
+			2.0		Dec 11, 2013	Jun 11, 2015
+			1.9		May 21, 2013	Nov 21, 2014
+			1.8		Sep 28, 2012	Mar 28, 2014
+			1.7		Apr 18, 2012	Oct 18, 2013
+			1.6		Jan 22, 2012	Jul 22, 2013
+			1.5		Nov 9, 2011		Mar 9, 2013
+			1.4		Jul 8, 2011		Jan 8, 2013
+			1.3		Apr 12, 2011	Sep 12, 2012
+			1.2		Dec 29, 2010	Jun 29, 2012
+			1.1		Jul 30, 2010	Jan 30, 2012
+			1.0		Feb 23, 2010	Aug 23, 2011
+
+chap 3 neo4j data modelling
+
+	p124
+		data structure
+			nodes
+			relationships
+			properties
+			labels
+
+	p126
+		er modelling
+			user stories:
+				extract entities from nouns
+				extract properties from adjectives
+				extract relationships from vers
+
+		problems with er model
+			no direction
+			too many joins
+
+	p131
+		graph modelling
+			start with user stories
+			best practices
+				use case를 사용하여 관계 정렬하기
+				n-ary 관계를 주의 깊게 다루자
+				granulate pattern을 주의깊게 다루자
+					Q: "이것을 property로 다루어야 하는가 아니면 node로 만들어야 하는가"
+					고려사항: node를 평가하는 것이 property를 평가하는 것보다 속도가 빠르다.
+
+	p139
+		함정
+			하나의 노드에 너무 많은 property를 넣는다 (anti pattern)
+			하나의 노드가 여러 개념을 나타낸다 (anti pattern)
+			연결되지 않은 그래프
+			고밀집 노드 패턴 (anti pattern) -> fan out 노드로 해결한다
+
+chap 4
+
+chap 5
+
+chap 6
+
+chap 7
+
+chap 8
+
+chap 9
+
+chap 10
+
+chap 11
+
+chap 12
+
+chap 13
+
+chap 14
+
+chap 15
+
+appendix
