@@ -1,173 +1,345 @@
-Learning Neo4j 3.x second edition 1�� �� �ֿ� ���� ���
+Learning Neo4j 3.x second edition 1독 후 주요 내용 요약
 
-chap 1 �׷��� �̷а� �����ͺ��̽�
+chap 1 그래프 이론과 데이터베이스
 
-	p47
-		types of database
+    p47
+        types of database
 
-			navigational database
+            navigational database
 
-			relational database
+            relational database
 
-			nosql database
+            nosql database
 
-				key-value store: redis, dynamodb
+                key-value store: redis, dynamodb
 
-				column family store: bigtable, cassandra, hbase
+                column family store: bigtable, cassandra, hbase
 
-				document store: mongodb, couchdb
+                document store: mongodb, couchdb
 
-				graph database: neo4j
+                graph database: neo4j
 
-	p65
-		neo4j basics
+    p65
+        neo4j basics
 
-			node		1:1..N	label
+            node        1:1..N  label
 
-			relation	1:1		type
+            relation    1:1     type
 
-chap 2 Neo4j �����ϱ�
+chap 2 Neo4j 시작하기
 
-	p81
-		cypher language
-			https://en.wikipedia.org/wiki/Cypher_(query_language)
+    p81
+        cypher language
+            https://en.wikipedia.org/wiki/Cypher_(query_language)
 
-	p82
-		opencypher
-			https://www.opencypher.org/
+    p82
+        opencypher
+            TODO: https://www.opencypher.org/
 
-	p87
-		license
-			community edition - GPLv3
-			enterprise edition - AGPLv3 or NTCL
+    p87
+        license
+            community edition - GPLv3
+            enterprise edition - AGPLv3 or NTCL
 
-	p89
-		installation options
+    p89
+        installation options
 
-			windows (jre bundled)
-				server
-					download zip
-					console mode
-						bin\neo4j console
-						http://localhost:7474/browser
-						ctrl-c for stop
-					service mode
-						bin\neo4j install-service
-						neo4j start
-						neo4j stop
-				desktop (recommended)
-					neo4j-desktop-version-setup.exe
+            windows (jre bundled)
+                server
+                    download zip
+                    console mode
+                        bin\neo4j console
+                        http://localhost:7474/browser
+                        ctrl-c for stop
+                    service mode
+                        bin\neo4j install-service
+                        neo4j start
+                        neo4j stop
+                desktop (recommended)
+                    neo4j-desktop-version-setup.exe
 
-			mac or linux (no jre bundle)
-				bin/neo4j start
-				http://localhost:7474
+            mac or linux (no jre bundle)
+                bin/neo4j start
+                http://localhost:7474
 
-			graph as a service
-				graphenedb
-					this provides a free tier
-				heroku
-				graphstory
-				graphgrid
-				azure
-				clevercloud
-				ovh
-				google cloud platform
-				openshift
-				aws
+            graph as a service
+                graphenedb
+                    this provides a free tier
+                heroku
+                graphstory
+                graphgrid
+                azure
+                clevercloud
+                ovh
+                google cloud platform
+                openshift
+                aws
 
-			neo4j sandbox
-				7 day free tier
+            neo4j sandbox
+                7 day free tier
 
-			docker
-				ubuntu mint linux
-					install docker-ce
+            docker
+                ubuntu mint linux
+                    install docker-ce
 
-						required packages
-							sudo apt-get -y install apt-transport-https ca-certificates curl
+                        required packages
+                            sudo apt-get -y install apt-transport-https ca-certificates curl
 
-						add docker.com key to local keys
-							sudo -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+                        add docker.com key to local keys
+                            sudo -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
 
-						add docker repo to the system
-							sudo add-apt-repository "deb [arch=amd64 https://download.docker.com/linux/ubuntu$(lsb_release -cs) stable"
+                        add docker repo to the system
+                            sudo add-apt-repository "deb [arch=amd64 https://download.docker.com/linux/ubuntu$(lsb_release -cs) stable"
 
-					file system prep
+                    file system prep
 
-						cd ~
-						mkdir neo4j
-						cd neo4j
-						mkdir logs data
+                        cd ~
+                        mkdir neo4j
+                        cd neo4j
+                        mkdir logs data
 
-					run neo4j in docker container
+                    run neo4j in docker container
 
-						docker run --rm --publish=7474:7474 --publis=7687:7687 --volume=$HOME/neo4j/data:/data --volume=$HOME/neo4j/logs:/logs neo4j:3.1.2
-						docker ps
-						docker stop <container_id>
+                        docker run --rm --publish=7474:7474 --publis=7687:7687 --volume=$HOME/neo4j/data:/data --volume=$HOME/neo4j/logs:/logs neo4j:3.1.2
+                        docker ps
+                        docker stop <container_id>
 
-		versions
-			Release	Release Date	End of Support Date	Compatible Driver Versions
-			4.2		Nov 17, 2020	May 16, 2022		4.2, 4.1, 4.0
-			4.1		Jun 23, 2020	Dec 23, 2021		4.2, 4.1, 4.0
-			4.0		Jan 15, 2020	Jul 14, 2021		4.2, 4.1, 4.0
-			3.5(**)	Nov 29, 2018	Nov 28, 2021		4.2, 4.1, 4.0, 1.7
-			3.4		May 17, 2018	Mar 31, 2020 (*)	1.7, 1.6
-			3.3		Oct 24, 2017	Apr 28, 2019		1.7, 1.6, 1.5, 1.4
-			3.2		May 11, 2017	Nov 31, 2018		1.6, 1.5, 1.4, 1.3
-			3.1		Dec 13, 2016	Jun 13, 2018		1.6, 1.5, 1.4, 1.3, 1.2, 1.1
-			3.0		Apr 16, 2016	Oct 31, 2017		1.5, 1.4, 1.3, 1.2, 1.1, 1.0
-			2.3		Oct 21, 2015	Apr 21, 2017
-			2.2		Mar 25, 2015	Sep 25, 2016
-			2.1		May 29, 2014	Nov 29, 2015
-			2.0		Dec 11, 2013	Jun 11, 2015
-			1.9		May 21, 2013	Nov 21, 2014
-			1.8		Sep 28, 2012	Mar 28, 2014
-			1.7		Apr 18, 2012	Oct 18, 2013
-			1.6		Jan 22, 2012	Jul 22, 2013
-			1.5		Nov 9, 2011		Mar 9, 2013
-			1.4		Jul 8, 2011		Jan 8, 2013
-			1.3		Apr 12, 2011	Sep 12, 2012
-			1.2		Dec 29, 2010	Jun 29, 2012
-			1.1		Jul 30, 2010	Jan 30, 2012
-			1.0		Feb 23, 2010	Aug 23, 2011
+        versions
+            Release Release         EOL             Compatible Driver Versions
+            4.2     Nov 17, 2020    May 16, 2022    4.2, 4.1, 4.0
+            4.1     Jun 23, 2020    Dec 23, 2021    4.2, 4.1, 4.0
+            4.0     Jan 15, 2020    Jul 14, 2021    4.2, 4.1, 4.0
+            3.5     Nov 29, 2018    Nov 28, 2021    4.2, 4.1, 4.0, 1.7
+            3.4     May 17, 2018    Mar 31, 2020    1.7, 1.6
+            3.3     Oct 24, 2017    Apr 28, 2019    1.7, 1.6, 1.5, 1.4
+            3.2     May 11, 2017    Nov 31, 2018    1.6, 1.5, 1.4, 1.3
+            3.1     Dec 13, 2016    Jun 13, 2018    1.6, 1.5, 1.4, 1.3, 1.2, 1.1
+            3.0     Apr 16, 2016    Oct 31, 2017    1.5, 1.4, 1.3, 1.2, 1.1, 1.0
+            2.3     Oct 21, 2015    Apr 21, 2017
+            2.2     Mar 25, 2015    Sep 25, 2016
+            2.1     May 29, 2014    Nov 29, 2015
+            2.0     Dec 11, 2013    Jun 11, 2015
+            1.9     May 21, 2013    Nov 21, 2014
+            1.8     Sep 28, 2012    Mar 28, 2014
+            1.7     Apr 18, 2012    Oct 18, 2013
+            1.6     Jan 22, 2012    Jul 22, 2013
+            1.5     Nov 9, 2011     Mar 9, 2013
+            1.4     Jul 8, 2011     Jan 8, 2013
+            1.3     Apr 12, 2011    Sep 12, 2012
+            1.2     Dec 29, 2010    Jun 29, 2012
+            1.1     Jul 30, 2010    Jan 30, 2012
+            1.0     Feb 23, 2010    Aug 23, 2011
 
 chap 3 neo4j data modelling
 
-	p124
-		data structure
-			nodes
-			relationships
-			properties
-			labels
+    p124
+        data structure
+            nodes
+            relationships
+            properties
+            labels
 
-	p126
-		er modelling
-			user stories:
-				extract entities from nouns
-				extract properties from adjectives
-				extract relationships from vers
+    p126
+        er modelling
+            user stories:
+                extract entities from nouns
+                extract properties from adjectives
+                extract relationships from vers
 
-		problems with er model
-			no direction
-			too many joins
+        problems with er model
+            no direction
+            too many joins
 
-	p131
-		graph modelling
-			start with user stories
-			best practices
-				use case�� ����Ͽ� ���� �����ϱ�
-				n-ary ���踦 ���� ���� �ٷ���
-				granulate pattern�� ���Ǳ��� �ٷ���
-					Q: "�̰��� property�� �ٷ��� �ϴ°� �ƴϸ� node�� ������ �ϴ°�"
-					��������: node�� ���ϴ� ���� property�� ���ϴ� �ͺ��� �ӵ��� ������.
+    p131
+        graph modelling
+            start with user stories
+            best practices
+                use case를 사용하여 관계 정렬하기
+                n-ary 관계를 주의 깊게 다루자
+                granulate pattern을 주의깊게 다루자
+                    "이것을 property로 다루어야 하는가 아니면 node로 만들어야 하는가"와 같은 질문을 해보자.
+                    고려사항: node를 평가하는 것이 property를 평가하는 것보다 속도가 빠르다.
 
-	p139
-		����
-			�ϳ��� ��忡 �ʹ� ���� property�� �ִ´� (anti pattern)
-			�ϳ��� ��尡 ���� ������ ��Ÿ���� (anti pattern)
-			������� ���� �׷���
-			������ ��� ���� (anti pattern) -> fan out ���� �ذ��Ѵ�
+    p139
+        함정
+            하나의 노드에 너무 많은 property를 넣는다 (anti pattern)
+            하나의 노드가 여러 개념을 나타낸다 (anti pattern)
+            연결되지 않은 그래프
+            고밀집 노드 패턴 (anti pattern) -> fan out 노드로 해결한다
 
-chap 4
+chap 4 사이퍼 시작하기
+
+    p148
+        CREATE (romeo:Person{name: "Romeo"}) - [:LOVES] -> (juliet:Person{name:"Juliet"});
+
+        MATCN (n)
+        RETURN n;
+
+    p151 CRUD - CREATE
+
+        # 한 줄로 할 때 id 필요없음.
+        CREATE (:Person{name: "Romeo"}) - [:LOVES] -> (:Person{name:"Juliet"});
+
+        # 그런데 아래와 같이 하면 노드가 중복 생성됨
+        CREATE (:Person{name: "Romeo"}) - [:LOVES] -> (:Person{name:"Juliet"});
+        CREATE (:Person{name:"Juliet"}) - [:LOVES] -> (:Person{name: "Romeo"});
+
+        # identifier를 사용하여 두 줄로하면 중복이 제거된다 (의도적인 typo 있음)
+        CREATE (romeo:Person{firstName: "Romeo", age: 13}) - [:LOVES] -> (juliet:Person{name:"Juliet", age: 13});
+
+        CREATE (juliet) - [:LOVES] -> (romeo)
+        RETURN romeo, juliet;
+
+        # 중복 제거를 위한 더 나은 표현이 있다 -> MERGE
+
+    p154 READ
+
+        MATCH (n:Person)
+        WHERE n.name = "Juliet" or n.firstName = "Juliet"
+        RETURN n;
+
+        MATCH (n:Person) - [:LOVES] - ()
+        WHERE toLower(n.name) = "juliet"
+        RETURN n ORDER BY n.age
+        SKIP 2 LIMIT 5;
+
+    p156 UPDATE
+
+        # 특정 노드의 property 변경
+        MATCH (n:Person{name: "Juliet"}
+        WHERE n.age = 13
+        SET n.age = 14
+        RETURN n;
+
+        # Q: 아래 두 문장은 성능이 똑같은가? => query planner를 돌려보자.
+
+            MATCH (n:Person{name: "Juliet"} WHERE n.age = 13 SET n.age = 14 RETURN n;
+            MATCH (n:Person} WHERE n.name = "Juliet" and n.age = 13 SET n.age = 14 RETURN n;
+
+        # 모든 노드의 property 변경
+        MATCH (n:Person)
+        SET n.age = n.age + 1
+        RETURN n;
+
+        # 노드에 레이블 추가
+        MATCH (n:Person)
+        WHERE n.age >= 12 AND n.age < 18
+        SET n:Teen
+        RETURN n;
+
+        # 노드 레이블 제거
+        MATCH (n:Person)
+        WHERE n.age >= 18
+        REMOVE n:Teen
+        RETURN n;
+
+        # property가 없는 경우에만 초기화
+        MATCH (n:Person)
+        WHERE n.age is null
+        SET n.age = 0
+        RETURN n;
+
+        # 여러 property를 동시에 변경 (방법 1)
+        MATCH (n:Person)
+        SET n.age = 0, n.smell = "teenSpirit"
+        RETURN n;
+
+        # 여러 property를 동시에 변경 (방법 2)
+        MATCH (n:Person)
+        SET n.age = 0
+        SET n.smell = "teenSpirit"
+        RETURN n;
+
+    p158 DELETE
+
+        # 노드 삭제 (relationship이 있으면 실패함)
+        MATCH (r:Person{lastName: "Montague"})
+        DELETE r;
+
+        # 연결된 relationship을 포함하여 노드 삭제
+        MATCH (r:Person{lastName: "Montague"})
+        DETACH DELETE r;
+
+    p159 사이퍼 키워드
+
+        MATCH       패턴 매칭
+
+        WHERE       필터링
+
+        RETURN      결과를 최종 반환
+
+        WITH        쿼리 내에서 다음 스텝으로 결과를 전달한다
+
+        ORDER BY .. SKIP .. LIMIT ..
+
+        CREATE      노드 또는 관계 생성
+
+        CREATE UNIQUE   중복없이 노드 또는 관계 생성
+
+        MERGE       패턴 매치가 되면 MATCH operation, 패턴 매치 안 되면 CREATE operation을 수행.
+
+            MERGE (me:Person {name: "My Name"})
+            ON MATCH me
+            SET me.accessed = timestamp()
+            ON CREATE me
+            SET me.age = 42
+
+        SET         속성, 레이블 변경
+
+        REMOVE      속성, 레이블 삭제
+
+        DELETE      노드, 관계 삭제
+
+            MATCH (me)
+            OPTIONAL MATCH (me) - [r] - ()
+            DELETE me, r;
+
+    p161
+        표기법
+
+            node identifier     camel
+                romeo
+
+            label               camel beginning with caps
+                LabelExample, Person
+
+            relationship        all caps
+                LOVES
+
+            property            camel
+                propertyExample, age, lastName
+
+            keyword             all caps
+                MATCH, WHERE
+
+        UNIQUE INDEX 설정
+
+            CREATE CONSTRAINT ON (p:Person) ASSERT p.identifier IS UNIQUE;
+
+        UNIQUE INDEX 설정 제거
+
+            DROP CONSTRAINT ON (p:Person) ASSERT p.identifier IS UNIQUE;
+
+    p164
+
+        TODO: 실습
+
+    p169
+
+        # 친구들 나열
+        MATCH (le:Dude {name:"Lebowski"}) <- [:FRIEND_OF] - (some:Dude)
+        RETURN some;
+
+        # 친구의 친구들 나열
+        MATCH (le:Dude {name:"Lebowski"}) <- [:FRIEND_OF] - (someA:Dude) <- [:FRIEND_OF] - (someB:Dude)
+        RETURN someB;
+
+        # 3차 이내의 모든 친구 나열
+        MATCH (le:Dude {name:"Lebowski"}) <- [:FRIEND_OF*3] - (some:Dude)
+        RETURN DISTINCT some;
+
+    p170
+        TODO: https://neo4j.com/docs/cypher-refcard/current/
 
 chap 5
 
