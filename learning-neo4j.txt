@@ -183,25 +183,27 @@ chap 3 neo4j data modelling
 chap 4 사이퍼 시작하기
 
     p148
-        CREATE (romeo:Person{name: "Romeo"}) - [:LOVES] -> (juliet:Person{name:"Juliet"});
+        #
+        CREATE (romeo:Person{name: "Romeo"}) - [:LOVES] -> (juliet:Person{name:"Juliet"})
 
+        #
         MATCN (n)
-        RETURN n;
+        RETURN n
 
     p151 CRUD - CREATE
 
         # 한 줄로 할 때 id 필요없음.
-        CREATE (:Person{name: "Romeo"}) - [:LOVES] -> (:Person{name:"Juliet"});
+        CREATE (:Person{name: "Romeo"}) - [:LOVES] -> (:Person{name:"Juliet"})
 
         # 그런데 아래와 같이 하면 노드가 중복 생성됨
-        CREATE (:Person{name: "Romeo"}) - [:LOVES] -> (:Person{name:"Juliet"});
-        CREATE (:Person{name:"Juliet"}) - [:LOVES] -> (:Person{name: "Romeo"});
+        CREATE (:Person{name: "Romeo"}) - [:LOVES] -> (:Person{name:"Juliet"})
+        CREATE (:Person{name:"Juliet"}) - [:LOVES] -> (:Person{name: "Romeo"})
 
         # identifier를 사용하여 두 줄로하면 중복이 제거된다 (의도적인 typo 있음)
-        CREATE (romeo:Person{firstName: "Romeo", age: 13}) - [:LOVES] -> (juliet:Person{name:"Juliet", age: 13});
+        CREATE (romeo:Person{firstName: "Romeo", age: 13}) - [:LOVES] -> (juliet:Person{name:"Juliet", age: 13})
 
         CREATE (juliet) - [:LOVES] -> (romeo)
-        RETURN romeo, juliet;
+        RETURN romeo, juliet
 
         # 중복 제거를 위한 더 나은 표현이 있다 -> MERGE
 
@@ -209,12 +211,12 @@ chap 4 사이퍼 시작하기
 
         MATCH (n:Person)
         WHERE n.name = "Juliet" or n.firstName = "Juliet"
-        RETURN n;
+        RETURN n
 
         MATCH (n:Person) - [:LOVES] - ()
         WHERE toLower(n.name) = "juliet"
         RETURN n ORDER BY n.age
-        SKIP 2 LIMIT 5;
+        SKIP 2 LIMIT 5
 
     p156 UPDATE
 
@@ -222,56 +224,57 @@ chap 4 사이퍼 시작하기
         MATCH (n:Person{name: "Juliet"}
         WHERE n.age = 13
         SET n.age = 14
-        RETURN n;
+        RETURN n
 
         # Q: 아래 두 문장은 성능이 똑같은가? => query planner를 돌려보자.
 
-            MATCH (n:Person{name: "Juliet"} WHERE n.age = 13 SET n.age = 14 RETURN n;
-            MATCH (n:Person} WHERE n.name = "Juliet" and n.age = 13 SET n.age = 14 RETURN n;
+            MATCH (n:Person{name: "Juliet"} WHERE n.age = 13 SET n.age = 14 RETURN n
+
+            MATCH (n:Person} WHERE n.name = "Juliet" and n.age = 13 SET n.age = 14 RETURN n
 
         # 모든 노드의 property 변경
         MATCH (n:Person)
         SET n.age = n.age + 1
-        RETURN n;
+        RETURN n
 
         # 노드에 레이블 추가
         MATCH (n:Person)
         WHERE n.age >= 12 AND n.age < 18
         SET n:Teen
-        RETURN n;
+        RETURN n
 
         # 노드 레이블 제거
         MATCH (n:Person)
         WHERE n.age >= 18
         REMOVE n:Teen
-        RETURN n;
+        RETURN n
 
         # property가 없는 경우에만 초기화
         MATCH (n:Person)
         WHERE n.age is null
         SET n.age = 0
-        RETURN n;
+        RETURN n
 
         # 여러 property를 동시에 변경 (방법 1)
         MATCH (n:Person)
         SET n.age = 0, n.smell = "teenSpirit"
-        RETURN n;
+        RETURN n
 
         # 여러 property를 동시에 변경 (방법 2)
         MATCH (n:Person)
         SET n.age = 0
         SET n.smell = "teenSpirit"
-        RETURN n;
+        RETURN n
 
     p158 DELETE
 
         # 노드 삭제 (relationship이 있으면 실패함)
         MATCH (r:Person{lastName: "Montague"})
-        DELETE r;
+        DELETE r
 
         # 연결된 relationship을 포함하여 노드 삭제
         MATCH (r:Person{lastName: "Montague"})
-        DETACH DELETE r;
+        DETACH DELETE r
 
     p159 사이퍼 키워드
 
@@ -305,7 +308,7 @@ chap 4 사이퍼 시작하기
 
             MATCH (me)
             OPTIONAL MATCH (me) - [r] - ()
-            DELETE me, r;
+            DELETE me, r
 
     p161
         표기법
@@ -327,11 +330,11 @@ chap 4 사이퍼 시작하기
 
         UNIQUE INDEX 설정
 
-            CREATE CONSTRAINT ON (p:Person) ASSERT p.identifier IS UNIQUE;
+            CREATE CONSTRAINT ON (p:Person) ASSERT p.identifier IS UNIQUE
 
         UNIQUE INDEX 설정 제거
 
-            DROP CONSTRAINT ON (p:Person) ASSERT p.identifier IS UNIQUE;
+            DROP CONSTRAINT ON (p:Person) ASSERT p.identifier IS UNIQUE
 
     p164
 
@@ -341,15 +344,15 @@ chap 4 사이퍼 시작하기
 
         # 친구들 나열
         MATCH (le:Dude {name:"Lebowski"}) <- [:FRIEND_OF] - (some:Dude)
-        RETURN some;
+        RETURN some
 
         # 친구의 친구들 나열
         MATCH (le:Dude {name:"Lebowski"}) <- [:FRIEND_OF] - (someA:Dude) <- [:FRIEND_OF] - (someB:Dude)
-        RETURN someB;
+        RETURN someB
 
         # 3차 이내의 모든 친구 나열
         MATCH (le:Dude {name:"Lebowski"}) <- [:FRIEND_OF*3] - (some:Dude)
-        RETURN DISTINCT some;
+        RETURN DISTINCT some
 
     p170
         TODO: https://neo4j.com/docs/cypher-refcard/current/
@@ -409,19 +412,19 @@ chap 5 사이퍼의 놀라운 프로시저 - APOC
 
     p177 function
 
-        CREATE (p:Person{GUID: apoc.create.UUID()});
+        CREATE (p:Person{GUID: apoc.create.UUID()})
 
     p178 help
 
-        CALL apoc.help('meta');
+        CALL apoc.help('meta')
 
     p179 schema
 
         # 3.1
-        CALL apoc.meta.graph;
+        CALL apoc.meta.graph()
 
         # 3.2+
-        CALL db.schema();
+        CALL db.schema()
 
     p182 apoc 사용 권한 설정
 
@@ -431,12 +434,12 @@ chap 5 사이퍼의 놀라운 프로시저 - APOC
 
         Random graph generator
 
-            CALL apoc.generate.ba(1000, 2, 'Person', 'FRIEND_OF');
+            CALL apoc.generate.ba(1000, 2, 'Person', 'FRIEND_OF')
 
             Q: 왜 p to p 관계를 찾지?
 
             MATCH (p:Person) - [FRIEND_OF] - (p)
-            RETURN p;
+            RETURN p
 
         랜덤 그래프 생성 알고리즘
 
@@ -447,6 +450,59 @@ chap 5 사이퍼의 놀라운 프로시저 - APOC
                 apoc.generate.simple
                 apoc.generate.ws
 
+    p183 pagerank 테스트
+
+        # create nodes
+        FOREACH (id IN range(0, 1000) | CREATE (n:Node {id: id}))
+
+        # create relationships
+        # Q: LIMIT과 WHERE는 순서를 뒤집어야 하는 거 아닌가?
+        MATCH (n1:Node), (n2:Node)
+        WITH n1, n2
+        LIMIT 1000000
+        WHERE rand() < 0.1
+        CREATE (n1) - [:TYPE_1] -> (n2)
+
+        # call pagerank
+        MATCH (node:Node)
+        WITH collect(node) as nodes
+        CALL apoc.algo.pageRank(nodes) YIELD node, score
+        RETURN node, score
+        ORDER BY score DESC
+
+    p185 timed run
+
+        # usage
+        CALL apoc.cypher.runTimeboxed(stmt, params, timeoutInMs)
+
+        # example
+        CALL apoc.cypher.runTimeboxed('MATCH (n) RETURN n', NULL, 2)
+
+    p186 function 'link': 노드 집합에 대해 relationship을 만든다.
+
+        # EARTHBRO_OF 관계 생성
+
+        MATCH (p:Person)
+        WITH collect(p) as persons
+        CALL apoc.nodes.link(persons, 'EARTHBRO_OF')
+        RETURN length(persons)
+
+        # EARTHBRO_OF 관계 카운트
+
+        MATCH (p:Person) - [r:EARTHBRO_OF] - (m:Person)
+        RETURN p, count(r)
+
+    p186 다른 주제들
+
+        TODO Trigger
+
+        TODO Refactoring => 뒤에 나옴
+
+        TODO TTL
+
+        TODO Date, Time
+
+        TODO CouchDB, ElasticSearch, MongoDB
 
 chap 6
 
