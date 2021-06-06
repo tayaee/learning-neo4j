@@ -98,11 +98,24 @@ chap 2 Neo4j 시작하기
                         cd neo4j
                         mkdir logs data
 
-                    run neo4j in docker container
+                    run neo4j 3.1.2 in docker container
 
                         docker run --rm --publish=7474:7474 --publis=7687:7687 --volume=$HOME/neo4j/data:/data --volume=$HOME/neo4j/logs:/logs neo4j:3.1.2
                         docker ps
                         docker stop <container_id>
+
+                    run neo4j 4.0
+
+                        docker run \
+                            -p 7474:7474 -p 7687:7687 \
+                            -v $PWD/data:/data \
+                            -v $PWD/plugins:/plugins \
+                            --name neo4j-apoc \
+                            -e NEO4J_apoc_export_file_enabled=true \
+                            -e NEO4J_apoc_import_file_enabled=true \
+                            -e NEO4J_apoc_import_file_use__neo4j__config=true \
+                            -e NEO4JLABS_PLUGINS=\[\"apoc\"\] \
+                            neo4j:4.0
 
         versions
             Release Release         EOL             Compatible Driver Versions
@@ -341,7 +354,99 @@ chap 4 사이퍼 시작하기
     p170
         TODO: https://neo4j.com/docs/cypher-refcard/current/
 
-chap 5
+chap 5 사이퍼의 놀라운 프로시저 - APOC
+
+    p174 apoc 설치
+
+        doc
+            https://neo4j.com/labs/apoc/4.1/installation/
+
+        download
+            https://github.com/neo4j-contrib/neo4j-apoc-procedures/releases/4.1.0.0
+
+            full 또는 core 하나만 다운로드하여 $NEO4J_HOME/plugins 에 넣는다. 둘 다 넣지 않는다.
+            https://github.com/neo4j-contrib/neo4j-apoc-procedures/releases/download/4.1.0.0/apoc-4.1.0.0-all.jar를 plugins에 복사
+            apoc.nlp.*를 사용하려면 apoc-mongodb-dependencies-4.1.0.0.jar 다운로드
+            apoc.mongodb.*를 사용하려면 apoc-nlp-dependencies-4.1.0.0.jar 다운로드
+
+        windows, mac, linux (local)
+
+            neo4j stop
+            neo4j start
+
+            neo4j restart
+
+        docker
+
+            cd ~/neo4j
+            mkdir plugins
+
+            plugins 옵션 추가하여 container 재생성
+
+                docker run \
+                    -p 7474:7474 -p 7687:7687 \
+                    -v $PWD/data:/data \
+                    -v $PWD/logs:/logs \
+            +       -v $PWD/plugins:/plugins \
+                    --name neo4j-apoc \
+                    -e NEO4J_apoc_export_file_enabled=true \
+                    -e NEO4J_apoc_import_file_enabled=true \
+                    -e NEO4J_apoc_import_file_use__neo4j__config=true \
+                    -e NEO4JLABS_PLUGINS=\[\"apoc\"\] \
+                    neo4j:4.0
+
+    p176 apoc 상태 체크
+
+        CALL dbms.functions() YIELD name
+        WHERE name STARTS WITH 'apoc.'
+        RETURN count(name)
+        UNION
+        CALL dbms.procedures() YIELD name
+        WHERE name STARTS WITH 'apoc.'
+        RETURN count(name)
+
+        v3.3.0은 98, 201
+
+    p177 function
+
+        CREATE (p:Person{GUID: apoc.create.UUID()});
+
+    p178 help
+
+        CALL apoc.help('meta');
+
+    p179 schema
+
+        # 3.1
+        CALL apoc.meta.graph;
+
+        # 3.2+
+        CALL db.schema();
+
+    p182 apoc 사용 권한 설정
+
+        # 이것이 없으면 apoc.algo.pagerank를 사용할 수 없다.
+        conf/neo4j.conf
+    +       dbms.security.procedures.unrestricted=apoc.*
+
+        Random graph generator
+
+            CALL apoc.generate.ba(1000, 2, 'Person', 'FRIEND_OF');
+
+            Q: 왜 p to p 관계를 찾지?
+
+            MATCH (p:Person) - [FRIEND_OF] - (p)
+            RETURN p;
+
+        랜덤 그래프 생성 알고리즘
+
+            https://neo4j.com/labs/apoc/4.1/graph-updates/graph-generators/
+                apoc.generate.ba
+                apoc.generate.complete
+                apoc.generate.er
+                apoc.generate.simple
+                apoc.generate.ws
+
 
 chap 6
 
