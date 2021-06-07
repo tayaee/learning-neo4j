@@ -1048,7 +1048,26 @@ chap 10 Neo4j 보안
 
     skipped for now.
 
-chap 11
+chap 11 Neo4j 시각화하기
+
+    시각화 라이브러리
+
+        d3.js - neo4j 브라우저에 사용됨
+        graphviz
+        sigma.js - Linkurio.us에 의해 사용됨
+        vivagraph.js
+        yworks - 자동 레이아웃 기능 인상적
+        cytoscape
+
+        애플리케이션에 라이브러리 통합 패턴 => p280의 다이어그램 참조.
+
+    시각화 솔루션
+
+        gephi
+        keylines - 영국
+        linkurio.us
+        neo4j 브라우저
+        www.tomsawyer.com
 
 chap 12
 
