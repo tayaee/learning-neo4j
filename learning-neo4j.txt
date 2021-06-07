@@ -1042,11 +1042,11 @@ chap 8 Neo4j 로 데이터 가져오기
 
 chap 9 Neo4j Spacial 사용하기
 
-	skipped.
+    skipped.
 
 chap 10 Neo4j 보안
 
-	skipped for now.
+    skipped for now.
 
 chap 11
 
