@@ -504,7 +504,335 @@ chap 5 사이퍼의 놀라운 프로시저 - APOC
 
         TODO CouchDB, ElasticSearch, MongoDB
 
-chap 6
+chap 6 사이퍼 확장하기
+
+    p190
+        git clone https://github.com/neo4j-examples/neo4j-procedure-template
+
+            src\main\java\example\GetRelationshipTypes.java
+            src\main\java\example\Join.java
+            src\main\java\example\Last.java
+            src\main\java\example\TraverseDemo.java
+            src\test\java\example\GetRelationshipTypesTests.java
+            src\test\java\example\JoinTest.java
+            src\test\java\example\LastTest.java
+            src\test\java\example\TraverseDemoTest.java
+            src\test\resources\movie.cypher
+
+            neo4j.version 4.2.3     class version 55 (java 11)
+
+    p190
+        custom 함수 만들기
+
+            # 싱글 value 리턴하는 함수
+
+            learningneo4j.isOdd(num)
+
+    +           package learningneo4j;
+
+                public class OddEven {
+    +               @UserFunction
+    +               @Description("Returns true if odd")
+    +               public Boolean isOdd(@Name("number") Long number) {
+                        if (number == null)
+                            return false;
+                        return number % 2 == 1;
+                    }
+                }
+
+                mvn clean package
+
+                output 파일을 plugins 로 복사
+
+                test 1
+                    #
+                    CREATE (t:Test (val: 15))
+
+                    #
+                    MATCH (t:Test) WHERE learningneo4j.isOdd(t.val)
+                    RETURN t
+
+                test 2
+                    Q: unwind와 collect 가 비슷한 시리즈인 듯?  unwind는 []를 rows로. collect은 rows를 []로?
+                    Q: WITH random에서 random은 rows 아니었나? 그걸 그냥 val:random 에 사용한다고?
+                    #
+                    UNWIND apoc.coll.randomItems(range(0, 1000), 15) as random
+                    WITH random
+                    CREATE (t:Test (val:random))
+                    RETURN t
+
+
+            # 싱글 value 리턴하는 함수
+
+            example.join(['s1', 's2'], ',')
+
+                src\main\java\example\Join.java
+                    1: package example;
+                    3: import java.util.List;
+                    5: import org.neo4j.procedure.Description;
+                    6: import org.neo4j.procedure.Name;
+                    7: import org.neo4j.procedure.UserFunction;
+                    9: /**
+                   10:  * This is an example how you can create a simple user-defined function for Neo4j.
+                   11:  */
+                   12: public class Join {
+    +              14:     @UserFunction
+    +              15:     @Description("example.join(['s1','s2',...], delimiter) - join the given strings with the given delimiter.")
+                   16:     public String join(
+                   17:             @Name("strings") List<String> strings,
+                   18:             @Name(value = "delimiter", defaultValue = ",") String delimiter) {
+                   19:         if (strings == null || delimiter == null) {
+                   20:             return null;
+                   21:         }
+                   22:         return String.join(delimiter, strings);
+                   23:     }
+                   24: }
+
+    p193
+        custom procedure 용도
+            rss, json 등 인터넷 소스를 이용하여 그래프에 데이터 추가
+            기존 데이터에서 그래프 정리 등.
+
+        unique constraint
+
+            # 제약 생성
+            create constraint on (ln:LastName) assert ln.lastName is unique
+
+            # LastName 레이블이 없는 노트 확인. 이것이 0을 리턴해야 한다. Q: 뭐라고? 이게 뭘 한다고?
+            match (n:LastName)
+
+        실행하고자 하는 query:
+
+            # 모든 LastName 레이블이 있는 노드를 삭제
+            MATCH (ln:LastName)
+            DETECH DELETE (ln)
+
+            # LastName 레이블 그루핑을 다시 함.
+            MATCH (p:Person)
+            WITH learningneo4j.getLastWord(p.name) as lw, p
+            MERGE (ln:LastName {lastName: lw}
+            WITH ln, p
+            CREATE (p) - [:IS_NAMED] -> (ln)
+
+        regroupByLastName procedure 구현
+
+        +   package learningneo4j;
+
+        +   @Procedure
+            @Description('CALL learningneo4j.regroupByLastName()')
+            public void regroupByLastName() {
+                Driver driver = GraphDatabase.driver("bolt://localhost", AuthTokens.basic("neo4j", "password"));
+                try (Session session = driver.session()) {
+                    try (Transaction tx = session.beginTransaction()) {
+                        tx.run("MATCH (ln:LastName) DETECH DELETE (ln)");
+                        tx.run("MATCH (p:Person) " +
+                               "WITH learningneo4j.getLastWord(p.name) as lw, p " +
+                               "MERGE (ln:LastName {lastName: lw} " +
+                               "WITH ln, p " +
+                               "CREATE (p) - [:IS_NAMED] -> (ln)");
+                        tx.success();
+                    }
+                }
+            }
+
+        regroupByLastName의 결과로 생성된 노드를 보는 방법
+
+            MATCH (a) <- [r:IS_NAMED] - (p:Person)
+            RETURN a, r, p LIMITE 50
+
+        새 노드를 생성한 후 그것을 리턴하려면 위 procedure를 아래와 같이 수정한다.
+
+            package learningneo4j;
+
+        +   @Procedure(mode = Mode.WRITE)
+        +   @Description('CALL learningneo4j.regroupByLastNameVerbose()')
+        +   public Stream<StringResult> regroupByLastNameVerbose() {
+                Driver driver = GraphDatabase.driver("bolt://localhost", AuthTokens.basic("neo4j", "password"));
+                try (Session session = driver.session()) {
+                    try (Transaction tx = session.beginTransaction()) {
+                        tx.run("MATCH (ln:LastName) DETECH DELETE (ln)");
+        +               StatementResult result =
+                            tx.run("MATCH (p:Person) " +
+                                   "WITH learningneo4j.getLastWord(p.name) as lw, p " +
+                                   "MERGE (ln:LastName {lastName: lw} " +
+                                   "WITH ln, p " +
+                                   "CREATE (p) - [:IS_NAMED] -> (ln)");
+                        tx.success();
+        +               return result.list(r -> new StringResult(r.get(0).toString())).stream();
+                    }
+                }
+            }
+
+    p197 custom 집계 함수
+
+        # 집계 결과를 리턴하는 함수
+
+            src\main\java\example\Last.java
+                1: package example;
+                3: import org.neo4j.procedure.*;
+                5: /**
+                6:  * This is an example how you can create a simple user-defined function for Neo4j.
+                7:  */
+                8: public class Last {
+        +      10:     @UserAggregationFunction("example.last")
+               11:     @Description("example.last(value) - returns last non-null row")
+               12:     public LastFunction last() {
+               13:         return new LastFunction();
+               14:     }
+               17:     public static class LastFunction {
+               19:         private Object lastValue;
+        +      21:         @UserAggregationUpdate
+               22:         public void aggregate(@Name("value") Object value) {
+               23:             if (value != null) {
+               24:                 this.lastValue = value;
+               25:             }
+               26:         }
+        +      28:         @UserAggregationResult
+               29:         public Object result() {
+               30:             return lastValue;
+               31:         }
+               32:     }
+               33: }
+
+        대략 이렇게 사용?
+
+            # 각 LastName에서 마지막 firstName을 리턴.
+            MATCH (ln:LastName) -- (p:Person)
+            RETURN ln, example.last(p.firstName) as lastFirstName
+
+    p199
+        현재 서버에 설치된 custom aggregate function의 목록을 확인하는 방법은 없다 (as of 3.1.2)
+
+        Aggregating functions
+            https://neo4j.com/docs/cypher-manual/current/functions/aggregating/
+
+    p199 Unmanaged extensino - JAX-RS 2.0 code
+
+        https://neo4j.com/docs/java-reference/current/extending-neo4j/http-server-extensions/
+
+        Required dependencies for neo4j 3.1.2:
+
+            # 둘 다 provided. neo4j runtime이 두 가지를 다 가지고 있다는 뜻임.
+            org.neo4j:neo4j:3.1.2:provided
+            javax.ws.rs:javax.ws.rs-api:2.0:provided
+
+        사용법 먼저: 이렇게 사용하고 싶음.
+
+            http://localhost:7474/learningneo4j/persons/lastnames
+
+        각 path element는 아래와 같이 지정함.
+
+            /learningneo4j      <= package learningneo4j
+            /persons            <= @Path("/persons") on class
+            /lastnames          <= @Path("/lastnames") on method
+
+        코드 PersonResource.java
+
+            package learningneo4j;
+
+            @Path("/persons")
+            public class PersonResource {
+        +       private final GraphDatabaseService db;
+                public PersonResource(@javax.ws.rs.core.Context GraphDatabaseService db) {
+                    this.db = db;
+                }
+
+                @GET
+                @Path("/lastnames")
+                @Produces(MediaType.TEXT_PLAIN)
+                public String getLastNames() {
+        +           try (Transaction tx = db.beginTx()) {   // 트랜잭션은 필수다
+        +               ResourceIterator<Node> nodes = db.findNodes(Label.label("LastName"));
+        +               List<String> lastNames = new ArrayList<String>();
+                        Node n = null;
+                        while (nodes.hasNext()) {
+                            n = nodes.next();
+                            lastNames.add((String) n.getProperty("lastName"));
+                        }
+                        nodes.close();
+                        tx.success();
+                        return lastNames.toString();
+                    }
+                }
+            }
+
+        Output jar 파일을 plugins 폴더로 복사.
+
+        테스트.
+
+        unit test 작성 방법은 https://neo4j.com/docs/java-reference/current/extending-neo4j/http-server-extensions/ 참조.
+
+    p203 JSON streaming response
+
+        키는 JsonGenerator를 사용한다는 점.
+
+        Required dependency for neo4j 3.1.2:
+
+            org.codehaus.jackson:jackson-maper-asl:1.9.7:provided
+
+        사용법
+
+            http://localhost:7474/learningneo4j/persons/friends/Damion%20Hand
+
+        FriendsResource.java
+
+        +   package learningneo4j;
+
+        +   @Path("/friends")
+            public class FriendsResource {
+                private final GraphDatabaseService db;
+                private final ObjectMapper objectMapper;
+                private static final RelationshipType FRIEND_OF = RelationshipType.withName("FRIEND_OF");
+                private static final Label PERSON = Label.label("Person");
+
+                public FriendsResource(@javax.ws.rs.core.Context GraphDatabaseService db) {
+                    this.db = db;
+                    this.objectMapper = objectMapper;
+                }
+
+                @GET
+        +       @Path("/{personName}")
+                public Response findFriends(@PathParam("personName") final String personName) {
+                    StreamingOutput stream = new StreamingOutput() {
+
+                        @Override
+                        public void write(OutputStream os) throws IOExceptino, WebApplicationException {
+                            JsonGenerator jg = objectMapper.getJsonFactory().createJsonGenerator(os, JsonEncoding.UTF8);
+                            jg.writeStartObject();
+                            jg.writeFieldName("friends");
+                            jg.writeStartArray();
+
+                            try (Transaction tx = db.beginTx(); ResourceIterator<Node> persons = db.findNodes(PERSON, "name", personName)) {
+                                while (persons.hasNext()) {
+                                    Node person = persons.next();
+                                    for (Relationship to : person.getRelationships(FRIEND_OF, OUTGOING)) {
+                                        Node friend = to.getEndNode();
+                                        jg.writeString(friend.getProperty("name").toString());
+                                        for (Relationship from : person.getRelationships(FRIEND_OF, INCOMING)) {
+                                            Node friendComing = from.getStartNode();
+                                            jg.writeString(friendComing.getProperty("name").toString());
+                                        }
+                                    }
+                                }
+                                tx.success();
+                            }
+
+                            jg.writeEndArray();
+                            jg.writeEndObject();
+                            jg.flush();
+                            jg.close();
+                        }
+                    };
+                    return Response.ok().entity(stream).type(MediaType.APPLICATION_JSON).build();
+                }
+            }
+
+        jar 파일을 plugins 폴더로 복사
+
+        http://localhost:7474/learningneo4j/persons/friends/Damion%20Hand 열어본다
+
+            # 아래 query 결과와 같은 내용이 표시된다
+            MATCH p = () - [r:FRIEND_OF] -> () RETURN p LIMIT 25
 
 chap 7
 
