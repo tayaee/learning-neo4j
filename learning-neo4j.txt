@@ -1044,7 +1044,9 @@ chap 9 Neo4j Spacial 사용하기
 
 	skipped.
 
-chap 10
+chap 10 Neo4j 보안
+
+	skipped for now.
 
 chap 11
 
