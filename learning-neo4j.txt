@@ -100,7 +100,11 @@ chap 2 Neo4j 시작하기
 
                     run neo4j 3.1.2 in docker container
 
-                        docker run --rm --publish=7474:7474 --publis=7687:7687 --volume=$HOME/neo4j/data:/data --volume=$HOME/neo4j/logs:/logs neo4j:3.1.2
+                        docker run --rm \
+                            --publish=7474:7474 \
+                            --publis=7687:7687 \
+                            --volume=$HOME/neo4j/data:/data \
+                            --volume=$HOME/neo4j/logs:/logs neo4j:3.1.2
                         docker ps
                         docker stop <container_id>
 
@@ -802,7 +806,8 @@ chap 6 사이퍼 확장하기
                             jg.writeFieldName("friends");
                             jg.writeStartArray();
 
-                            try (Transaction tx = db.beginTx(); ResourceIterator<Node> persons = db.findNodes(PERSON, "name", personName)) {
+                            try (Transaction tx = db.beginTx();
+                                 ResourceIterator<Node> persons = db.findNodes(PERSON, "name", personName)) {
                                 while (persons.hasNext()) {
                                     Node person = persons.next();
                                     for (Relationship to : person.getRelationships(FRIEND_OF, OUTGOING)) {
@@ -1149,7 +1154,8 @@ chap 12 Neo4j를 이용한 데이터 리팩토링
 
     p301 property를 label로 변환
 
-        # hasRestaurant = true인 모든 Tower 노드에 대해, HasRestaurant 레이블을 추가한 후 hasRestaurant 속성은 제거하려면
+        # hasRestaurant = true인 모든 Tower 노드에 대해,
+        # HasRestaurant 레이블을 추가한 후 hasRestaurant 속성은 제거하려면
 
             match (t:Tower)
             where t.hasRestaurant
@@ -1161,7 +1167,8 @@ chap 12 Neo4j를 이용한 데이터 리팩토링
 
     p301 property를 Node로 변환
 
-        # country: country_code 속성을 가진 모든 Tower에 대해, Tower -[:IN_COUNTRY]->Country {code:t.country} 형태의 관계로 변환한다.
+        # country: country_code 속성을 가진 모든 Tower에 대해,
+        # Tower -[:IN_COUNTRY]->Country {code:t.country} 형태의 관계로 변환한다.
 
             match (t:Tower)
             merge (c:Country {code: t.country})
