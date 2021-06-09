@@ -1247,7 +1247,64 @@ chap 13 Neo4j 클러스터링
 
     skipped for now.
 
-chap 14
+chap 14 사용 사례 - 추천
+
+    # 제품 구매 기록 기반하여 제품 추천 #1
+
+        # 사람 p1, p2가 같은 제품 prod1을 사고, p2가 prod2를 샀지만 p1은 prod2를 사지 않은 경우 p1에게 prod2를 추천
+        match (p1:Person) - [:BOUGHT] -> (prod1:Product) <- [:BOUGHT] - (p2:Person) - [:BOUGHT] -> (prod2:Product)
+        where not(p1-[:BOUGHT]->prod2)
+        return p1.name as FirstPerson,
+            p2.name as SecondPerson,
+            prod1.name as CommonProduct,
+            prod2.name as Recommended
+
+        FIXME not 부분에 SyntaxError가 발생하는데?
+
+    # 제품 구매 기록 기반하여 제품 추천 #2
+
+        # 사람 p1, p2가 공통 제품 2가지를 샀고, p2가 prod2를 샀지만 p1은 prod2를 사지 않은 경우 p1에게 prod2를 추천
+        match (p1:Person) - [:BOUGHT] -> (prod1:Product) <- [:BOUGHT] - (p2:Person) - [:BOUGHT] -> (prod2:Product)
+        with p1, p2, count(prod1) as NumOfSharedProducts, collect(prod2) as SharedProducts, prod2
+        where not(p1-[:BOUGHT]->prod2) and NumOfSharedProducts >= 2
+        return p1.name as FirstPerson,
+            p2.name as SecondPerson,
+            extract(x in SharedProducts | x.name) as SharedProducts,
+            prod2.name as Recommended
+
+    # 브랜드 충성도에 기반을 둔 제품 추천 #3
+
+        # 애플 제품을 2개 이상 가지고 있다면 또 다른 애플 제품을 추천해보자.
+        match (p:Person) - [b:BOUGHT] -> (prod1:Product) - [:MADE_BY] -> (br:Brand) <- [:MADE_BY] - (prod2:Product)
+        with p, br, prod2, count(prod1) as NumOfBrandProducts
+        where not (p - [:BOUGHT] -> prod2) and NumOfBrandProducts > 1
+        return p.name as Person, br.name as Brand, collect(prod2.name) as Recommended
+        order by Person asc
+
+        # FIXME 이것도 not 부분에 문법 에러.
+
+    # 가족 관계에 기반을 둔 제품 추천
+
+        # 나의 형제자매가 산 제품을 내가 가지고 있지 않다면 나에게 추천
+        match (p:Person) - [b:BOUGHT] -> (prod:Product), p <- [r1] - (parent:Person) - [r2] ->  (sibling:Person)
+        where type(r1) in ["MOTHER_OF", "FATHER_OF"] and type(r2) in ["MOTHER_OF", "FATHER_OF"] and not (sibling-[:BOUGHT]->prod)
+        return p.name as Person, prod.naem as Recommended, collect(sibliong.name) as ForSibling
+
+    # 보다 강력한 추천, 위 세 가지를 모두 합쳐 보자
+
+        match (p1:Person) - [:BOUGHT] -> (prod1:Product) <- [:BOUGHT] - (p2:Person) - [:BOUGHT] -> (prod2:Product),
+            p1 <- [r1] - (parent:Person) - (r2) -> p2,
+            prod1 - [:MADE_BY] -> (br:Brand) <- [:MADE_BY] - (prod2)
+        where type(r1) in ["MOTHER_OF", "FATHER_OF"] and type(r2) in ["MOTHER_OF", "FATHER_OF"] and not (p1 - [:BOUGHT] -> prod2)
+        return p1.name as FirstPerson, p2.name as SecondPerson, br.name as Brand, prod2.name as Recommended
+
+    more neo4j use cases
+
+        부정 행위 탐지 fraud detection
+
+        출입 통제 access control
+
+        소셜 네트워킹
 
 chap 15
 
