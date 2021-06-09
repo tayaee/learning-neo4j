@@ -1308,4 +1308,38 @@ chap 14 사용 사례 - 추천
 
 chap 15
 
+    p345
+
+        # BCP 분석: 어느 건물에 어느 애플리케이션이 사용되는가.
+        match (app:Application) <- [:USES] - (proc:Process) - [:USED_BY] -> (bl:BusinessLine) - [:LOCATED_IN] -> (b:Building)
+        return distinct app.name as Application, b.name as Building
+        order by app.name asc
+
+    p348
+
+        # Loc_100에 RTO 0-2h인 BusinessProcess가 있는가?
+        match (b:Building {name:"Loc_100"}), (rto:RTO {name: "0-2 hrs"}) <- [:BUSINESSPROCESS_HAS_RTO] - (bp:BusinessProcess)
+        with b, bp
+        match p = ShortestPath(b - [*..3] - bp)
+        return p
+
+    p354
+
+        # 제품가격 트리에 대해 총 가격 계산
+        match (n1:PRODUCT {id:1}) <- [r1] - (:COST_GROUP) <- [r2] - (:COST_TYPE) <- [r3] - (:COST_SUBTYPE) <- [r4] - (:COST) <- [r5] - (n6:COST_COMPONENT)
+        return sum(r1.quantity * r2.quantity * r3.quantity * r4.quantity * r5.quantity * n6.price) as CalculatedPrice
+
+    p355
+
+        # 리프 노드의 가격을 계산하여 중간 노드에 저장하며 루트 노드로 나아간다. 최종적으로 루트 노드가 총 합계를 저장.
+        match (n5:COST) <- [r5] - (n6:COST_COMPONENT)
+        with n5, sum(r5.quantity * n6.price) as Sum
+        set n5.price = Sum
+
+        이것을 루트 노드까지 반복.
+
+        # 가격 계산
+        match (n1:PRODUCT {id:1} <- [r1] - (n2:COST_GROUP)
+        return sum(r1.quantity * n2.price)
+
 appendix
