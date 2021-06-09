@@ -1243,7 +1243,9 @@ chap 12 Neo4j를 이용한 데이터 리팩토링
         call apoc.refactor.to(r, a) yield output
         return output
 
-chap 13
+chap 13 Neo4j 클러스터링
+
+    skipped for now.
 
 chap 14
 
