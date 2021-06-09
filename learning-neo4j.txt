@@ -1343,3 +1343,96 @@ chap 15
         return sum(r1.quantity * n2.price)
 
 appendix
+
+    p361 비밀번호 재설정
+
+        data/dbms 아래의 auth 파일 삭제
+
+    p365 Neo4j 브라우저 가이드
+
+        https://github.com/neo4j-contrib/neo4j-guides
+
+        http-server.py
+
+            #! /usr/bin/env python
+            import os
+            try:
+                from http.server import HTTPServer, SimpleHTTPRequestHandler
+            except ImportError:
+                from BaseHTTPServer import HTTPServer
+                from SimpleHTTPServer import SimpleHTTPRequestHandler
+
+            class CORSRequestHandler(SimpleHTTPRequestHandler):
+
+                def end_headers (self):
+                    self.send_header('Access-Control-Allow-Origin', '*')
+                    self.send_header('Access-Control-Allow-Methods', 'GET')
+                    self.send_header('Access-Control-Allow-Headers', '*')
+                    self.send_header('Access-Control-Allow-Headers', 'Pragma,Cache-Control,If-Modified-Since,Content-Type,X-Requested-With,X-stream,X-Ajax-Browser-Auth')
+                    SimpleHTTPRequestHandler.end_headers(self)
+
+                def do_OPTIONS(self):
+                    self.send_response(200)
+                    self.end_headers()
+
+            if __name__ == '__main__':
+                HTTPServer(('0.0.0.0', 8001), CORSRequestHandler).serve_forever()
+
+    p366 백업
+
+        # 1
+        data 폴더를 백업
+
+        # 2
+        neo4j-admin dump -to=<file> --database=<dbName>
+
+        neo4j-admin load from=<file>
+
+    p368 cypher-shell
+
+        count.cy
+
+            match (n)
+            return count(n);
+
+        cypher-shell -u uadmin -p uadmin --debug --format plain < count.cy
+
+    p369 데이터 통합 도구
+
+        www.talend.com
+
+    p370 모델링 도구
+
+        www.apcjones.com/arrows
+
+        github.com/apcj/arrows
+
+        omnigraffle
+
+    p371 커뮤니티 프로젝트
+
+        libcypher-parser
+
+        structr
+
+        neo4j-client.net
+
+        ngraph.path
+
+        popoto.js
+
+        neo4j-graph-algorithms
+
+    p372 온라인 문서
+
+        neo4j.com/docs
+
+        www.youtube.com/c/neo4j
+
+        neo4j-apoc-procedures
+
+    p372 커뮤니티
+
+        stackoverflow.com/questions/tagged/neo4j
+
+        neo4j.com/developer.com/slack/
