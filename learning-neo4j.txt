@@ -34,7 +34,12 @@ chap 2 Neo4j 시작하기
 
     p82
         opencypher
-            TODO: https://www.opencypher.org/
+            https://www.opencypher.org/
+            https://www.gqlstandards.org/
+            https://s3.amazonaws.com/artifacts.opencypher.org/openCypher9.pdf
+            https://en.wikipedia.org/wiki/Cypher_(query_language)
+
+            Cypher -> openCypher -> iso standard
 
     p87
         license
