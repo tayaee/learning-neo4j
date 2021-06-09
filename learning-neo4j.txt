@@ -1207,6 +1207,42 @@ chap 12 Neo4j를 이용한 데이터 리팩토링
         call apoc.refactor.mergeNodes([a,b,c]) yield node
         return node
 
+    p304 관계 refactoring
+
+        # 테스트 데이터 삭제
+        match (n:MERGE) detach delete n
+
+        # 테스트 데이터 생성
+        create (a:FIRST:MERGE {name:'a', propF1: 'AF1', propF2: 'AF2'}),
+               (b:SECOND:MERGE {name:'b', propS1: 'BS1', propS2: 'BS2', propF2: 'VALUE FROM SECOND'}),
+               (c:THIRD:MERGE {name:'c', propT1: 'CT1', propT2: 'CT2', propF1: 'VALUE FROM THIRD'})
+        create (a) - [:A2B] -> (b), (b) - [:B2B] -> (b), (a) - [:A2C] -> (c), (b) - [:B2C] -> (c)
+
+        #
+        call db.schema.visualization
+
+        #
+        match (n:MERGE) return n
+
+        # A2B를 뒤집고 관계를 B2A로 다시 명명한다.  음 이거 apoc 프로시저 설치 필요하네.
+        match (a:FIRST:MERGE) - [r:A2B] -> (b:SECOND:MERGE)
+        call apoc.refactor.invert(r) yield output
+        return output
+
+        # 관계를 뒤집었다 치고. 이름도 A2B를 B2A로 바꾸어야겠지.
+        match (a:FIRST:MERGE) - [r:A2B] - (b:SECOND:MERGE)
+        call apoc.refactor.setType(r, 'B2A') yield output
+        return output
+
+        # 관계 r의 시작점을 c로 변경함
+        match (a:FIRST:MERGE) - [r:B2A] - (b:SECOND:MERGE), (c:THIRD)
+        call apoc.refactor.from(r, c)
+
+        # 관계 r의 끝점을 a로 변경함
+        match () - [r:B2B] - (), (a:FIRST)
+        call apoc.refactor.to(r, a) yield output
+        return output
+
 chap 13
 
 chap 14
