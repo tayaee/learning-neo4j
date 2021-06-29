@@ -1,0 +1,200 @@
+2021-06-28
+https://www.linkedin.com/learning/database-clinic-neo4j/creating-a-database?u=61697657
+
+1 neo4j in five mins
+
+2 create a database
+
+2.3 data modelling
+
+	https://www.apcjones.com/arrows/
+
+2.4 creating a datbase
+
+	create (c:County {name: "San Mateo"}) <-[:FOR_COUNTY]-(p:PopulationPrediction
+		{population: 1000, year: 2017, gendor: "Male", age: 33, race: "White"})
+
+2.5 import data
+
+	sample csv file: https://goo.gl/8kLTo9
+
+	load csv with headers from "file:///<file.csv>" as row
+	return row limit 5
+
+	load csv with headers from "file:///<file.csv>" as row
+	return count(*)
+
+	create constraint on (c:County) assert c.code is unique;
+
+	# 스키마 보기 (index, contraints)
+	:schema
+
+	# County 노드를 중복없이 임포트
+	using periodic commit 500000
+	load csv with headers from "file:///<file.csv>" as row
+	with distinct row.`County Code` as county_code, row.`County Name` as county_name
+	merge (c:County {code: toInteger(county_code)})
+	on create set c.name = county_name;
+
+	# 각 County별로 Prediction을 생성하여 연결
+	using periodic commit 50000
+	load csv with headers from "file:///<file.csv>" as row
+	match (c:County {code: toInteger(row.`County Code`)})
+	create (po:PoulationPrediction)
+	set po.year = toInteger(row.Year),
+		po.race = row.`Race name`,
+		po.age = toInteger(row.Age),
+		po.populatin = toInteger(row.Population)
+	create (po)-[:FOR_COUNTY]->(c);
+
+	key takeaway:
+		csv 로딩 시 중복 제거하려면?
+			use unique constraint
+			use merge
+
+2.6 query data
+
+	call db.schema
+
+3. join two datasets
+
+3.1 join datastes
+
+	https://data.gov.uk/dataset/road-accidents-safety-data
+
+	load csv with headers from "file://vehicles_2015.csv" as row
+	return row limit 5
+
+		Accident_Index 필드가 조인 키임을 확인
+
+	load csv with headers from "file://Accident_2015.csv" as row
+	return row limit 5
+
+		Accident_Severity: "3"	# 이 필드가 계산 타겟
+
+	load csv with headers from "file://Vehicle_Type_Lookup.csv" as row
+	return row limit 5
+
+	https://www.apcjones.com/arrows
+
+		Accident - [:INVOLVES] -> Vehicle - [:IS_TYPE]-> VehicleType
+
+		Accident
+			accidentIndex: string		# unique
+			severity: integer
+
+		VehicleType
+			name: string,
+			code: string
+
+3.3
+
+3.4
+	# 유일 조건
+	create constraint on (a:Accident) assert a.accidentIndex is unique;
+
+	# Accident 임포트
+	using periodic commit
+	load csv with headers from "file:///Accidents_2015.csv" as row
+	merge (a:Accident {accidentIndex: row.Accident_Index})
+	on create set a.severity = toInteger(row.Accident_Severity);
+
+	# Vehicle 임포트
+	using periodic commit
+	load csv with headers with "file://Vehicles_2015.csv" as row
+	match (a:Accident {accidentIndex: row.Accident_Index})
+	create (v:Vehicle)
+	# row의 모든 프로퍼티를 v로 로딩하는 문법임
+	set v += row
+	create (a)-[:INVOLVES]->(v);
+
+	# VehicleType 임포트
+	load csv headers from "file://Vehicle_Type_Lookup>csv" as row
+	merge (t:VehicleType {code: row.code})
+	set t.name = row.label
+	with t, row
+	match (v:Vehicle) where t.Vehicle_Type = row.code
+	create (v)-[:IS_TYPE]->(t);
+
+3.5 compute average accident severity
+
+	#
+	call db.schema
+
+	# v1 - 모터사이클 이름 조회
+	match (t:VehicleType)
+	where t.name contains "Motorcycle"
+	return t.name
+
+	# v2 - 모든 모터사이클의 사고 심각도 조회
+	match (a:Accident)-[:INVOLVES]->(v:Vehicle)-[:IS_TYPE]->(t:VehicleType)
+	where t.name contains "Motorcycle"
+	return a.severity
+
+	# v3 - 심각도 평균
+	match (a:Accident)-[:INVOLVES]->(v:Vehicle)-[:IS_TYPE]->(t:VehicleType)
+	where t.name contains "Motorcycle"
+	return avg(a.severity) as avg_severity
+
+	# v4 - group by 구현은 어떻게 하나
+	match (a:Accident)-[:INVOLVES]->(v:Vehicle)-[:IS_TYPE]->(t:VehicleType)
+	where t.name contains "Motorcycle"
+	return a.name, avg(a.severity) as avg_severity
+
+3.6 insights
+
+4. search a database
+
+4.1
+
+4.2
+
+4.3 2014년 CA의 모든 카운티 남, 여 통계를 테이블 형태로.
+	#
+	call db.schema
+
+	# v1 4.5초 걸림
+	match (p:PopulationPrediction)-[:FOR_COUNTY]->(c:County)
+	where p.year = 2014 AND p.gender = "Female"
+	return c.name, sum(p.population)
+
+	# v2 profile 보기 - NodeByLabelScan -> Expand(All) -> Filter -> ...
+	profile match (p:PopulationPrediction)-[:FOR_COUNTY]->(c:County)
+	where p.year = 2014 AND p.gender = "Female"
+	return c.name, sum(p.population)
+
+	잘 보면 index 대신 많은 rows 자체가 액세스되고 있음을 볼 수 있다.
+
+	# 필터 조건이 Year 이므로 인덱스 생성.
+	create index on :PopulationPrediction(year)
+
+	# Index, Constraint 목록 보기
+	:schema
+
+	# v3 인덱스 사용했을 때 274ms
+	match (p:PopulationPrediction)-[:FOR_COUNTY]->(c:County)
+	where p.year = 2014 AND p.gender = "Female"
+	return c.name, sum(p.population)
+
+	# v4 profile 보기: 플랜 NodeIndexSeek -> Filter -> ...
+	profile match (p:PopulationPrediction)-[:FOR_COUNTY]->(c:County)
+	where p.year = 2014 AND p.gender = "Female"
+	return c.name, sum(p.population)
+
+4.4 finalize the database query
+
+	# v5 카운티별로 Female, Male 각각 집계 (with를 써서 1차 계산 결과를 그 다음으로 넘긴다)
+	match (p:PopulationPrediction)-[:FOR_COUNTY]->(c:County)
+	where p.year = 2014 AND p.gender = "Female"
+	with c, sum(p.population) as Female
+	match (p:PopulationPrediction)-[:FOR_COUNTY]->(c)
+	where p.year = 2014 and p.gendor = "Male"
+	return c.name as `Year: 2014`, Female, sum(p.population) as Male
+
+5. crud operations
+
+5.1 crud https://www.linkedin.com/learning/database-clinic-neo4j/crud-operations?u=61697657
+
+5.2
+
+6. averags and calculations
