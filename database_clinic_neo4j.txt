@@ -331,7 +331,7 @@ https://www.linkedin.com/learning/database-clinic-neo4j/creating-a-database?u=61
 		match (l:Line) where l.text contains "LYSANDER"
 		return l.text
 
-5.6	DELETE
+5.6 DELETE
 
 		#
 		delete_query = '''
@@ -376,4 +376,57 @@ https://www.linkedin.com/learning/database-clinic-neo4j/creating-a-database?u=61
 		print(str(read_time))
 
 
-6. averags and calculations
+6. averages and calculations
+
+6.2
+	# year, population을 data set 1으로부터 추출
+
+	# education level, percent를 data set 2로부터 추출
+
+	# year, educatino level, forecast를 생성
+
+6.3 update the data model
+
+	Year {year} <- PopulationPrediction {population, year, age, race, gender} -[:FOR_COUNTY]-> County {code, name}
+
+	EducationObservation {population, year, income, age, education, gender} -[:FOR_YEAR]-> Year {year}
+
+6.4
+	# Year 노드 먼저 생성
+	create constraint on (y:Year) assert y.year is unique
+
+	# PP 노드에서 year를 모두 추출. 아직 연결된 건 아님.
+	match (p:PopulationPrediction)
+	with distinct p.year as pop_year
+	mege (y:Year {year: pop_year});
+
+	# 이거 동작하기는 하겠지만 tx 볼륨이 너무 큼.
+	MATCH (y:Year)
+	MATCH (p:PopulationPrediction) WHERE p.year = y.year
+	CREATE (p)-[:FOR_YEAR]->(y)
+
+	# tx를 작은 chunk로 자르기 위해, 자바 코드를 cypher에서 실행하는 거 가능함.
+
+	# apoc 설치. jar 파일을 plugins에 넣고 db restart.
+
+	# 확인
+	call dbms.procedures
+
+	# apoc을 사용하여 쪼개서 임포트
+	call apoc.periodic.iterate("match (y:Year) return y", "match (p:PopulationPrediction) where p.year  = y.year create (p)-[:FOR_YEAR]->(y)", {batchSize: 1, parallel: true, iterateList: true})
+
+	# 실행 에러
+	ERROR: Neo.ClientError.Procedure.ProcedureRegistrationFailed
+
+	# 다시 실행. 몇분 걸림. 7밀리언 레코드 처리.
+	call apoc.periodic.iterate("match (y:Year) return y", "match (p:PopulationPrediction) where p.year  = y.year create (p)-[:FOR_YEAR]->(y)", {batchSize: 1, parallel: true, iterateList: true})
+
+	#
+	call db.schema
+
+	County <-[:FOR_COUNTY]- PP -[:FOR_YEAR] -> Year
+
+6.5 Import data for calculatins
+
+	# 이제 Educatinoal Attainment 데이터 임포트할 차례
+

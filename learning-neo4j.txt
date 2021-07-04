@@ -437,9 +437,14 @@ chap 5 사이퍼의 놀라운 프로시저 - APOC
 
     p182 apoc 사용 권한 설정
 
-        # 이것이 없으면 apoc.algo.pagerank를 사용할 수 없다.
+		# 아래 설정을 추가해야 apoc 사용 가능.
         conf/neo4j.conf
     +       dbms.security.procedures.unrestricted=apoc.*
+
+		# 없을 때 나오는 에러
+		ERROR: Neo.ClientError.Procedure.ProcedureRegistrationFailed
+
+		# neo4j.conf 수정 후 db restart.
 
         Random graph generator
 
