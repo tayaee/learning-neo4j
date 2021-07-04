@@ -195,6 +195,185 @@ https://www.linkedin.com/learning/database-clinic-neo4j/creating-a-database?u=61
 
 5.1 crud https://www.linkedin.com/learning/database-clinic-neo4j/crud-operations?u=61697657
 
-5.2
+	neo4j community version
+
+	jupyter notebook
+
+	Character - [:SPEAKS] -> Line
+
+5.3 Connect to Neo4j
+
+		# install driver in jupyter
+		!pip install neo4j-driver
+		from neo4j.v1 import GraphDatabase
+		driver = GraphDatabase.driver("bolt://localhost:7687", auth="neo4j", "letmein")
+		with driver.session() as session:
+			result = session.run("match (a) return count(a) as num")
+
+			#
+			# method 1
+			#
+			for record in result:
+				print(record)
+
+			#
+			# method 2
+			#
+			print(record['num'])
+
+5.4 CREATE
+
+		Create Characters
+
+			with driver.session() as session:
+				session.run("create constraint on (c:Character) assert c.name is unique;")
+			create_character_query = '''
+			merge (c:Character {name: $name})
+			'''
+			with driver.session() as session:
+				with open("data/characters.txt") as f:
+					for line in f:
+						text = line.strip()
+						session.run(create_character_query, parameters={'name': text})
+
+
+		Create Line nodes
+
+			create_line_query = '''
+			create (l:Line {text: $line_text, number: $line_num})
+			with l
+			match (c:Character) where c.name = $current_character
+			create (l)<-[:SPEAKS]-(c)
+			'''
+
+			characters = set()
+
+			get_characters_query = '''
+			match (c:Character)
+			return c.name as name
+			'''
+
+			for driver.session as session:
+				result = session.run(get_characters_query)
+				for record in result:
+					characters.add(record['name'])
+
+			print(characters)
+
+		#
+		#
+		#
+		import time
+
+		begin = time.time()
+		with driver.session() as session:
+			with open("data/A_Midsummer_Nights_Dream.txt") as f:
+				current_character = ''
+				for line in f:
+					text = line.strip()
+					if text in characters:
+						current_character = text
+					else:
+						line_num += 1
+						session.run(create_line_query, parameterss={
+							'line_text': text,
+							'line_num': line_num,
+							'current_character': current_character
+						})
+			end = time.time()
+			create_time = (end - begin) / line_num * 1000
+
+		print(str(create_time))
+		0.360
+
+5.5 UPDATE
+
+		#
+		# 대사 가운데 인물명을 검색해봄
+		#
+		match (l:Line) where l.text contains "LYSANDER"
+		return l.text
+
+		# 대사 전체를 대문자로 변환하여 case-insensitive search 해봄
+		match (l:Line) where toUpper(l.text) contains "LYSANDER"
+		return l.text
+
+		# 이름을 대문자로 치환해봄
+		match (l:Line) where toUpper(l.text) contains "LYSANDER"
+		return replace(l.text, "Lysander", "LYSANDER")
+
+		# 코드
+		update_query = '''
+		with $character as character
+		with substring(character, 0, 1) + toLower(substring(character, 1)) as casedChar, character
+		match (l:Line) where toLower(l.text) contains toLower(character)
+		set l.text = replace(l.text, chasedChar, character)
+		return count(l) as num
+		'''
+
+		update_count = 0
+
+		with driver.session() as session:
+			begin = time.time()
+			for c in characters:
+				result = session.run(update_query, parameters = {'character': c})
+				#
+				# 리턴값이 싱글 레코드일 때
+				#
+				record = result.single()
+				update_count += record['num']
+			end = time.time()
+			update = (end - begin) / update_count * 1000
+			print(update_time)
+			0.635
+
+		# 다시 검색해봄. 모두 대문자로 변환되었나?
+		match (l:Line) where l.text contains "LYSANDER"
+		return l.text
+
+5.6	DELETE
+
+		#
+		delete_query = '''
+		with ['ENTER', 'EXIST', 'ACT', 'SCENE'] as words
+		match (l:Line) where any(x in words where toLower(l.text) starts with toLower(x))
+		detach delete l
+		return count(l) as num
+		'''
+
+		#
+		with driver.session() as session:
+			begin = time.time()
+			result = session.run(delete_query)
+			record = result.single()
+			num_lines = record['num']
+			end = time.time()
+			delete_time = (end - begin) / num_lines * 1000
+			print(delete_time)
+
+5.7 READ
+
+	#
+	read_query = '''
+	match (l:Line) return l.text as text, l.number as linenum
+	'''
+
+	#
+	with driver.session() as session
+		begin = time.time()
+		result = session.run(read_query)
+		for record in result:
+
+			# Line 출력
+			print("%i: %s" % (record['linenum'], record['text']))
+
+		# 라인수 출력
+		result = session.run("match (l:Line) return coutn(l) as num")
+		numlines = result.single()['num']
+
+		end = time.time()
+		read_time = (end - begin) / num_lines * 1000
+		print(str(read_time))
+
 
 6. averags and calculations
