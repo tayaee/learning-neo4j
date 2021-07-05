@@ -430,3 +430,44 @@ https://www.linkedin.com/learning/database-clinic-neo4j/creating-a-database?u=61
 
 	# 이제 Educatinoal Attainment 데이터 임포트할 차례
 
+	# csv 파일 구조 보기
+	load csv with headers from "file://a.csv" as row
+	return row limit 5
+
+	# Year 필드가 01/01/2008 12:00:00:AM 포맷으로 저장되어 있음을 볼 수 있다.
+
+	#
+	load csv with headers from "file://a.csv" as row
+	return apoc.date.fields(row.Year, 'MM/dd/yyyy hh:mm:ss a') limit 5
+
+	각 레코드가 date 오브젝에 파싱되어 있다
+	{
+		"weekdays": 2,
+		"years": 2008,	<== 이거 참조할 예정
+		"seconds": 0,
+		"zoneid": "UTC",
+		"minutes": 0,
+		"hours": 0,
+		"months": 1,
+		"days": 1
+	}
+
+	# with로 전환하고, 기존 year에다가 새 노드 생성 후 연결.
+	load csv with headers from "file://a.csv" as row
+	with row, apoc.date.fields(row.Year, 'MM/dd/yyyy hh:mm:ss a')['years'] as parsed_year
+	match (y:Year) where y.year = parsed_year
+	create (e:EducationObservation)
+	set e.population = toInteger(row.`PopulationCount`),
+	    e.year = parsed_year,
+		e.income = row.`Personal Income`,
+		e.age = e.Age,
+		e.education = row.`Educational Attainment`,
+		e.gender = row.Gender
+	create (y)<-[:FOR_YEAR]-(e)
+
+	# 이제 생성된 모델은 아래와 같다
+
+	County <-- PopulatinoPrediction -> Year <- EducationObservation
+
+6.6 perform calculation
+
