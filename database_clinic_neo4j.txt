@@ -498,3 +498,17 @@ https://www.linkedin.com/learning/database-clinic-neo4j/creating-a-database?u=61
 	match (e:EducationObservation with sum(e.population)as total
 	match (e:EducationObservation)
 	return e.ducation as education, toFloat(sum(e.population) / total) as percentage
+
+6.7 Combine queries for final calculation
+
+	#
+	match (e:EducationObservation) with sum(e.population) as total
+	match (e:EducationObservation)
+	with e.education as education, toFloat(sum(e.population) / total) as percentage
+	match (p:PopulationPrediction)-[:FOR_YEAR]->(y:Year)
+	return education, toInteger(sum(p.population) * percentage), y.year as year order by year
+
+References
+
+	https://neo4j.com/developer
+	https://neo4j.com/developer/get-started
