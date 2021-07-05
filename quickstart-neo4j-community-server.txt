@@ -1,0 +1,65 @@
+install jre 11+
+
+	install jdk-11.0.11_windows-x64_bin.exe from https://www.oracle.com/java/technologies/javase-jdk11-downloads.html
+
+	install at default location
+
+	set JAVA_HOME=C:\Program Files\Java\jdk-11.0.11
+	set PATH=%JAVA_HOME%;%PATH%
+
+community server 4.3.2
+
+	download neo4j-community-4.3.2-windows.zip from https://neo4j.com/download-center/#community
+
+	install at d:\dev\neo4j-community-4.3.2
+
+	set NEO4J_HOME=d:\dev\neo4j-community-4.3.2
+	set PATH=%NEO4J_HOME%\bin;%PATH%
+
+apoc plugins
+
+	download 4.3.0.0 from https://github.com/neo4j-contrib/neo4j-apoc-procedures/releases
+
+	install plugin jars at %NEO4J_HOME%\plugins
+
+		apoc-4.3.0.0-all.jar
+		apoc-couchbase-dependencies-4.3.0.0.jar
+		apoc-email-dependencies-4.3.0.0.jar
+		apoc-mongodb-dependencies-4.3.0.0.jar
+		apoc-nlp-dependencies-4.3.0.0.jar
+		apoc-xls-dependencies-4.3.0.0.jar
+
+apoc permission
+
+	%NEO4J_HOME%\conf\neo4j.conf
+
+		dbms.security.procedures.unrestricted=apoc.*
+		apoc.import.file.enabled=true
+
+console mode
+
+	cd /d %NEO4J_HOME%
+
+	bin\neo4j console
+
+	the service is ready at http://localhost:7474
+
+	^c to quit
+
+windows service mode
+
+	install service
+		bin\neo4j install-service
+
+	start
+		neo4j start
+
+	the service is ready at http://localhost:7474
+
+		neo4j / neo4j ==> neo4j / Password1
+
+	stop
+		neo4j stop
+
+	uninstall service
+		bin\neo4j uninstall-service

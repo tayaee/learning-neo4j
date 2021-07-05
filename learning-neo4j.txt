@@ -52,6 +52,11 @@ chap 2 Neo4j 시작하기
             windows (jre bundled)
                 server
                     download zip
+						https://neo4j.com/download-center/#community
+							4.3.2
+								https://s3-eu-west-1.amazonaws.com/dist.neo4j.org/neo4j-community-4.3.2-windows.zip?x-amz-security-token=IQoJb3JpZ2luX2VjEDoaCXVzLWVhc3QtMSJGMEQCIH2UOYYISI9Hv84LrKZv9OOZE2A1WQZ75bzi4F5DabAPAiAG3S6srG4y4H4m1pZmqpv3%2F1GsRFMcRnTnVLbAc8byeir6AwgiEAAaDDEyODkxNjY3OTMzMCIM%2FfPoVm5hfwGvYMNuKtcDPoNdOAQnnOxVMAWW3uSFOIOYuPFjWY8COJ3F03XB7adp09uztpZhrA6tPx%2BmPVH6QydmToS1CWdfdYDjlIJr9IToy0quHWcT5D15GMrolCC3Q1NlQJxgJZkomHdu%2FjkBrKAxR75O9XmZEV4JLM4DgruC9Fch1u9j%2FN3sr4Yan9%2BcJ%2BdBl4Vll7YPCKaTSWQFyJTkHorPfVfQOsUG0ME6KWaO9%2BlFBGfyQA161Fh3oSdY%2BLJ0ONNv8zg6iFmAsCHk2biToGkayEc60NtgIOoVyJPk79gC6AzdkHAS9ph%2FeysXt%2FothnoEPBZQehBqsxaeCt21okcexgwjUe%2B1mUWJTR%2FDKNfERf5IOZmAaQoi2lkVUK%2BKxkSYPTEx7kma4dprCakva2WFCga46xpAEAoCXqbUpcqKhoDmfHW1a1TnfzsAyWJwUNMavgq9zsxyrErlHwvZUxnbzTlevHCTnf5CszkajCdqklfJzUwG2U5%2FqjipXsokcqWJnh4KlAM1U%2FU1XOQj%2F0TD7mdekeeYAw7KGaNbmPRdKMbtLpyVnxrYZw2LzKeUOzYlwDlp%2FP0p299XLpCVUmHBaSyP9W%2BHfVPGYmxFezrka5DkqquF4aNDATKzFyV1PL5vMOm8iYcGOqYB8TSrrmlOD0eGFvaUpzpE3C8WUMzHrsRBnEKHEP7gDyOHiHTpbzd7WZhNn2Mgb0cHd87CihY8IZ7v%2FQmFgLVpi7RXkFHhC7rt2GIVfOchfGisSXeesskR%2FrV3Auf98WbZuPf%2Bg0%2FvbOMc%2BT1agZgX0LWaWlN9nh%2BMhVyyjaY8ZP3USm0K1M1k94I5eyxF0whQGa7LViBceYjiCVsjPAh4QTBrznFcTg%3D%3D&AWSAccessKeyId=ASIAR4BAINKRCRVOCN2V&Expires=1625451466&Signature=iateyQ3yWrn4lbcfrt9imPbsJFE%3D
+								neo4j-community-4.3.2-windows.zip
+
                     console mode
                         bin\neo4j console
                         http://localhost:7474/browser
@@ -61,7 +66,9 @@ chap 2 Neo4j 시작하기
                         neo4j start
                         neo4j stop
                 desktop (recommended)
-                    neo4j-desktop-version-setup.exe
+					https://neo4j.com/download-center/#desktop
+						1.4.7
+		                    neo4j-desktop-version-setup.exe
 
             mac or linux (no jre bundle)
                 bin/neo4j start
